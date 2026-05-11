@@ -1,9 +1,14 @@
 import React, { useEffect, useState } from "react";
+import { useFetchData } from "./hooks/useFetchData";
+import { useQuery } from "@tanstack/react-query";
 
 export default function DataFetch() {
-  const [data, setData] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
+  // const [data, setData] = useState([]);
+  // const [loading, setLoading] = useState(true);
+  // const [error, setError] = useState(false);
+
+  // ----------------------------------------------------------------------- with then and catch
+
 
   // useEffect(() => {
   //   setLoading(true);
@@ -25,27 +30,52 @@ export default function DataFetch() {
   //   }, 2000)
   // }, []);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        const res = await fetch("https://dummyjson.com/products");
-        if (!res.ok) throw new Error("Network response was not ok");
-        const { products } = await res.json();
-        setData(products);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-            }
-    };
+// -------------------------------------------------------------------------------with async await
 
-    fetchData();
-  },[]);
+
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     try {
+  //       setLoading(true);
+  //       const res = await fetch("https://dummyjson.com/products");
+  //       if (!res.ok) throw new Error("Network response was not ok");
+  //       const { products } = await res.json();
+  //       setData(products);
+  //     } catch (err) {
+  //       setError(err.message);
+  //     } finally {
+  //       setLoading(false);
+  //           }
+  //   };
+
+  //   fetchData();
+  // },[]);
+
+  //-----------------------------------------------------------------------------with custom hook
+
+// const {data, loading, error} = useFetchData("https://dummyjson.com/products");
+
+
+
+
+const { data, isLoading, isError, error} = useQuery({
+ queryKey:['products'],
+ queryFn: () => 
+  fetch("https://dummyjson.com/products")
+  .then(res => res.json())
+  .then(d => d.products)
+
+})
+
+
+if(isLoading) return <h1>Loading...</h1>
+if(isError) return <h1 className="text-red-500 text-xl">{error.message}</h1>
+
+
 
   return (
     <div className="bg-gray-800 text-white flex flex-col gap-10 min-h-screen p-10 ">
-      {loading ? (
+      {isLoading ? (
         <h1>Loading...</h1>
       ) : (
         data.map((item) => (
